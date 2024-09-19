@@ -16,6 +16,9 @@ public class AccountsService {
   private final AccountsRepository accountsRepository;
 
   @Autowired
+  private NotificationService notificationService;
+
+  @Autowired
   public AccountsService(AccountsRepository accountsRepository) {
     this.accountsRepository = accountsRepository;
   }
@@ -31,6 +34,8 @@ public class AccountsService {
   public void transfer(String accountFromId, String accountToId, BigDecimal amount) {
     Account accountFrom = accountsRepository.getAccount(accountFromId);
     Account accountTo = accountsRepository.getAccount(accountToId);
+    String description = " transferred the amount: " + amount + " To account : " + accountToId;
+    String descriptionaccountTo = " received the amount: " + amount + " from account : " + accountFromId;
 
     if (amount.compareTo(BigDecimal.ZERO) < 0) {
       throw new RuntimeException("The amount to transfer should always be a positive number : " + amount);
@@ -50,5 +55,7 @@ public class AccountsService {
 
     accountFrom.setBalance(accountFrom.getBalance().subtract(amount));
     accountTo.setBalance(accountTo.getBalance().add(amount));
+    this.notificationService.notifyAboutTransfer(accountFrom,description);
+    this.notificationService.notifyAboutTransfer(accountTo,descriptionaccountTo);
   }
 }
